@@ -9,6 +9,8 @@ export const PREVIEWS: Record<string, unknown> = {
       name: "Rampage",
       logoUrl: "/previews/rampage.jpg", // enviado pelo usuário para a prévia
       logoWithName: true,
+      headerFrom: "#1a3fd6", // azul escuro do logotipo
+      headerTo: "#1677d2", // tom mais claro que ainda segura texto branco (4,56:1)
       faviconUrl: "/previews/rampage.jpg",
       tagline: "iPhones novos e seminovos no Adrianópolis, com troca do seu usado.",
       accent: "#1a66f5",

@@ -29,6 +29,8 @@ export const settingsSchema = z.object({
     logoUrl: url,
     logoDarkUrl: url,
     logoWithName: z.boolean(), // logotipo só com ícone (comum em perfis do Instagram)
+    headerFrom: z.union([z.literal(""), hex]), // degradê do cabeçalho; vazio = cabeçalho padrão
+    headerTo: z.union([z.literal(""), hex]),
     faviconUrl: url,
     accent: hex,
     font: z.enum(Object.keys(FONT_OPTIONS) as [keyof typeof FONT_OPTIONS]),
@@ -109,6 +111,8 @@ export const DEFAULT_SETTINGS: StoreSettings = {
     logoUrl: "",
     logoDarkUrl: "",
     logoWithName: false,
+    headerFrom: "",
+    headerTo: "",
     faviconUrl: "",
     accent: "#0a84ff",
     font: "inter",
