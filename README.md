@@ -177,3 +177,15 @@ Os testes E2E do painel usam `E2E_ADMIN_EMAIL` e `E2E_ADMIN_PASSWORD` (crie um a
   ou `/troca`, 10 requisições por minuto por IP, ação `Deny`. No Supabase, mantenha o cadastro
   público desligado e, se houver tentativas de senha, ative CAPTCHA em **Authentication › Attack Protection**.
 - **Imagens**: use fotos próprias da loja ou com licença. Fotos oficiais de fabricantes exigem autorização.
+
+## Prévias para prospecção
+
+Para mostrar a um lojista como a loja dele ficaria, sem criar um banco novo:
+
+1. Adicione a "pele" da loja em `config/previews.ts` (nome, cor, fonte, tema, textos, endereço).
+2. Na Vercel, crie um projeto a partir deste mesmo repositório com as variáveis da demo
+   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)
+   e mais `PREVIEW_PRESET=<chave>` (ex.: `rampage`, `jb-iphone`).
+
+A prévia usa o catálogo e o WhatsApp da demonstração e mantém o aviso de demonstração ligado.
+Ao fechar o contrato, a loja ganha o próprio projeto Supabase (veja `docs/NOVA-LOJA.md`).

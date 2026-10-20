@@ -192,3 +192,6 @@ export function activeBanners(s: StoreSettings, today = new Date().toISOString()
     (b) => b.active && (!b.startsAt || b.startsAt <= today) && (!b.endsAt || b.endsAt >= today),
   );
 }
+
+/** Aplica um ajuste parcial (ex.: prévia de prospecção) sobre a configuração já resolvida. */
+export const withOverrides = (base: StoreSettings, over: unknown) => resolveSettings(merge(base, over));
