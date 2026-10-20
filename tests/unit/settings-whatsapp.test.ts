@@ -86,3 +86,12 @@ describe("prévias de prospecção", () => {
     }
   });
 });
+
+describe("URLs de imagem", () => {
+  it("aceitam arquivo do próprio site e recusam caminhos estranhos", () => {
+    expect(resolveSettings({ brand: { logoUrl: "/previews/rampage.jpg" } }).brand.logoUrl).toBe("/previews/rampage.jpg");
+    expect(resolveSettings({ brand: { logoUrl: "javascript:alert(1)" } }).brand.logoUrl).toBe("");
+    expect(resolveSettings({ brand: { logoUrl: "/a b\"onerror=x" } }).brand.logoUrl).toBe("");
+    expect(resolveSettings({ contact: { mapsUrl: "https://maps.app.goo.gl/abc" } }).contact.mapsUrl).toBe("https://maps.app.goo.gl/abc");
+  });
+});

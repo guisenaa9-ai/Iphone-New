@@ -10,17 +10,20 @@ import { waLink } from "@/lib/whatsapp";
 
 export type NavLink = { href: string; label: string };
 
-export function Logo({ name, logoUrl, logoDarkUrl }: { name: string; logoUrl: string; logoDarkUrl: string }) {
-  if (!logoUrl) return <span className="text-[17px] font-semibold tracking-[-0.02em]">{name}</span>;
+export function Logo({ name, logoUrl, logoDarkUrl, logoWithName }: { name: string; logoUrl: string; logoDarkUrl: string; logoWithName: boolean }) {
+  const text = <span className="text-[17px] font-semibold tracking-[-0.02em]">{name}</span>;
+  if (!logoUrl) return text;
+  const alt = logoWithName ? "" : name; // com o nome ao lado, a imagem é decorativa
   return (
-    <>
+    <span className="flex items-center gap-2.5">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={logoUrl} alt={name} className={`h-7 w-auto ${logoDarkUrl ? "dark-hide" : ""}`} />
+      <img src={logoUrl} alt={alt} className={`h-7 w-auto ${logoWithName ? "rounded-full" : ""} ${logoDarkUrl ? "dark-hide" : ""}`} />
       {logoDarkUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoDarkUrl} alt={name} className="dark-show h-7 w-auto" />
+        <img src={logoDarkUrl} alt={alt} className={`dark-show h-7 w-auto ${logoWithName ? "rounded-full" : ""}`} />
       )}
-    </>
+      {logoWithName && text}
+    </span>
   );
 }
 
@@ -30,7 +33,7 @@ export function Header({
   whatsapp,
   searchItems,
 }: {
-  brand: { name: string; logoUrl: string; logoDarkUrl: string };
+  brand: { name: string; logoUrl: string; logoDarkUrl: string; logoWithName: boolean };
   nav: NavLink[];
   whatsapp: string;
   searchItems: SearchItem[];

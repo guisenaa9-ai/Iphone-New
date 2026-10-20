@@ -83,6 +83,7 @@ export function SettingsForm({ initial, paymentsReady }: { initial: StoreSetting
               {single(b.faviconUrl, (u) => set("brand", { faviconUrl: u }), "Ícone da aba (favicon)", "brand")}
             </div>
             <p className="-mt-2 text-[13px] text-muted">Sem logotipo, o nome da loja aparece em texto.</p>
+            <Toggle label="Mostrar o nome ao lado do logotipo" description="Para logotipos que são só um ícone, como a foto do perfil do Instagram." checked={b.logoWithName} onChange={(e) => set("brand", { logoWithName: e.target.checked })} />
           </Card>
           <Card title="Aparência" hint="A cor de destaque é usada com moderação: botões principais, selos de oferta e foco.">
             <div className="grid gap-5 md:grid-cols-3">

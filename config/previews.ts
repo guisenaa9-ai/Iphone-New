@@ -7,6 +7,9 @@ export const PREVIEWS: Record<string, unknown> = {
   rampage: {
     brand: {
       name: "Rampage",
+      logoUrl: "/previews/rampage.jpg", // enviado pelo usuário para a prévia
+      logoWithName: true,
+      faviconUrl: "/previews/rampage.jpg",
       tagline: "iPhones novos e seminovos no Adrianópolis, com troca do seu usado.",
       accent: "#1a66f5",
       font: "jakarta",
