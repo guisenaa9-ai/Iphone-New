@@ -21,12 +21,19 @@ export function NewPasswordForm() {
     if (started.current) return; // o token do link só vale uma vez
     started.current = true;
     const auth = browserClient().auth;
-    // ?token_hash= vem do modelo de e-mail do Supabase e funciona em qualquer aparelho.
-    // Sem ele, o cliente troca o ?code= (PKCE) ao iniciar, o que só vale no navegador que pediu o link.
+    // O link pode chegar de três jeitos: #access_token= (pedido feito por /recuperar, vale em qualquer
+    // aparelho), ?token_hash= (modelo de e-mail personalizado) ou ?code= (PKCE, só no mesmo navegador).
+    const hash = new URLSearchParams(window.location.hash.slice(1));
     const tokenHash = new URLSearchParams(window.location.search).get("token_hash");
-    const session = tokenHash
-      ? auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ data }) => data.session)
-      : auth.getSession().then(({ data }) => data.session);
+    const access_token = hash.get("access_token");
+    const refresh_token = hash.get("refresh_token");
+    const session =
+      access_token && refresh_token
+        ? auth.setSession({ access_token, refresh_token }).then(({ data }) => data.session)
+        : tokenHash
+          ? auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ data }) => data.session)
+          : auth.getSession().then(({ data }) => data.session);
+    if (access_token) window.history.replaceState(null, "", window.location.pathname); // tira o token da barra de endereço
     session.then((s) => setState(s ? "ready" : "invalid"));
   }, []);
 
