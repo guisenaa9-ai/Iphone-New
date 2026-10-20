@@ -45,11 +45,14 @@ Tempo estimado: 40 a 60 minutos, mais o cadastro do catálogo.
 
 1. **Add New › Project** e importe este repositório (cada loja é um projeto Vercel separado).
 2. Em **Environment Variables**, cadastre as variáveis do `.env.example` com os valores DESTA loja.
-   A `SUPABASE_SERVICE_ROLE_KEY` e as chaves do Mercado Pago ficam só aqui — nunca no código.
+   A `SUPABASE_SERVICE_ROLE_KEY` (obrigatória: sem ela a loja não registra pedidos) e as chaves do
+   Mercado Pago ficam só aqui — nunca no código.
 3. Deploy. Região sugerida das funções: `gru1` (São Paulo), em **Settings › Functions**.
 4. **Settings › Domains**: adicione o domínio do lojista e crie no DNS os registros que a Vercel mostrar.
 5. Atualize `NEXT_PUBLIC_SITE_URL` com o domínio final e faça **Redeploy**.
 6. No Supabase, **Authentication › URL Configuration**: Site URL = domínio da loja.
+7. **Firewall › Rules › Add Rule** (*Rate Limit*): método `POST`, caminho `/checkout` ou `/troca`,
+   10 requisições por minuto por IP, ação `Deny`. É uma camada extra; o banco já tem seus limites.
 
 ## 3. Personalização (sem código)
 

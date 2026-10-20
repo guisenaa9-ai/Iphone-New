@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-/** Chave de serviço: ignora RLS. Uso exclusivo no servidor (webhook de pagamento). */
+/** Chave de serviço: ignora RLS. Uso exclusivo no servidor (pedidos, trocas e webhook de pagamento). */
 export function serviceClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY não configurada");
