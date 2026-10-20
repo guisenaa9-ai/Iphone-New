@@ -126,14 +126,18 @@ select id, 'owner' from auth.users where email = 'voce@exemplo.com';
 | `20261020000001_schema.sql` | tabelas: configuração, produtos, variantes, bairros, avaliações, pedidos, itens, trocas, admins |
 | `20261020000002_security_and_orders.sql` | RLS em todas as tabelas, `place_order` (preço e estoque vêm do banco, com bloqueio de linha), expiração de reservas, status pelo painel, confirmação de pagamento (só `service_role`), troca, mais vendidos, bucket `store-assets` |
 | `20261020000003_admin_functions.sql` | `admin_save_product` (produto + variantes numa transação) e `admin_dashboard` |
+| `20261020000004_rate_limits.sql` | limites contra abuso: pedidos e trocas só pela chave de serviço, com limite por IP e por telefone; reserva de WhatsApp em 12 h |
 
 Regras importantes:
 - O navegador **nunca** define preço: `place_order` recalcula tudo a partir das variantes e trava as
   linhas (`for update`) para não vender acima do estoque.
 - O estoque é reservado no pedido. Pedido online não pago libera em 60 min; pedido de WhatsApp sem
-  "Marcar como pago" libera em 48 h; cancelar no painel devolve na hora.
+  "Marcar como pago" libera em 12 h; cancelar no painel devolve na hora.
 - Pedido online só vira **Pago** pelo webhook: assinatura `x-signature` validada (HMAC-SHA256 com
   janela anti-replay), pagamento consultado na API do Mercado Pago e valor conferido com o total do pedido.
+- Pedidos e trocas só entram pelo site (chave de serviço), nunca direto pela chave pública. Limites:
+  5 pedidos por hora por IP (IPv6 conta o bloco /64), 2 pedidos em aberto por telefone, 3 trocas por
+  hora por IP e 3 por dia por telefone. Ficam no banco para não serem contornados pela API do Supabase.
 - Clientes não leem pedidos de ninguém; a página `/pedido/<uuid>` mostra só o resumo via função pública.
 
 ## Testes
@@ -150,7 +154,8 @@ Os testes E2E do painel usam `E2E_ADMIN_EMAIL` e `E2E_ADMIN_PASSWORD` (crie um a
 ## Publicação
 
 1. Projeto Supabase de produção com as migrations (sem o seed) e cadastro público de usuários desligado.
-2. Projeto Vercel com as variáveis do `.env.example`.
+2. Projeto Vercel com as variáveis do `.env.example` (a `SUPABASE_SERVICE_ROLE_KEY` é obrigatória:
+   sem ela a loja não registra pedidos).
 3. Domínio próprio em **Vercel › Settings › Domains** e `NEXT_PUBLIC_SITE_URL` com ele.
 4. Mercado Pago (opcional): token, webhook e assinatura — veja `docs/NOVA-LOJA.md`.
 
@@ -167,6 +172,8 @@ Os testes E2E do painel usam `E2E_ADMIN_EMAIL` e `E2E_ADMIN_PASSWORD` (crie um a
 
 - **Privacidade e Termos** são modelos alinhados à LGPD e ao CDC; cada lojista deve revisar com seu jurídico.
 - **Avaliações**: cadastre somente avaliações reais e autorizadas. A loja não exibe nada inventado.
-- **Limite de abuso**: o fechamento de pedido é público. Em produção, ative regras de limite de
-  requisições (Vercel Firewall) para `/checkout` se houver tentativas de reservar estoque em massa.
+- **Limite de abuso**: o banco já limita pedidos e trocas (veja *Banco de dados*). Como segunda camada,
+  crie em **Vercel › Firewall › Rules** uma regra *Rate Limit*: método `POST`, caminho `/checkout`
+  ou `/troca`, 10 requisições por minuto por IP, ação `Deny`. No Supabase, mantenha o cadastro
+  público desligado e, se houver tentativas de senha, ative CAPTCHA em **Authentication › Attack Protection**.
 - **Imagens**: use fotos próprias da loja ou com licença. Fotos oficiais de fabricantes exigem autorização.

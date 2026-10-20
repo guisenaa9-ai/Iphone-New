@@ -25,11 +25,19 @@ const ERRORS: Record<string, string> = {
   variant_unavailable: "Um dos produtos não está mais disponível.",
   insufficient_stock: "Um dos produtos não tem estoque suficiente. Revise o carrinho.",
   invalid_quantity: "Quantidade inválida.",
+  rate_limited: "Muitas tentativas seguidas. Aguarde um pouco e tente novamente.",
+  too_many_open_orders: "Você já tem pedidos em aberto. Fale com a loja pelo WhatsApp para concluí-los.",
 };
 
 function friendly(message: string) {
   const key = Object.keys(ERRORS).find((k) => message.startsWith(k));
   return key ? ERRORS[key] : "Não foi possível registrar o pedido. Tente novamente.";
+}
+
+// A Vercel sobrescreve o x-forwarded-for com o IP real, então o cliente não consegue forjá-lo.
+// shortcut: em outro host, confira se o proxy também sobrescreve esse cabeçalho.
+async function clientIp() {
+  return (await headers()).get("x-forwarded-for")?.split(",")[0].trim() || null;
 }
 
 /** Preço e estoque atuais das variantes do carrinho (o navegador só guarda uma cópia). */
@@ -79,9 +87,9 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   if (o.channel === "online" && !canSellOnline(s, paymentsConfigured())) return { ok: false, error: ERRORS.channel_disabled };
 
   const { privacy: _privacy, ...payload } = o;
-  const { data, error } = await anonClient().rpc("place_order", { payload });
+  const { data, error } = await serviceClient().rpc("place_order_limited", { payload, client_ip: await clientIp() });
   if (error) {
-    if (!/^(invalid_|insufficient_|variant_|channel_|pickup_|delivery_)/.test(error.message)) console.error("place_order:", error.message);
+    if (!/^(invalid_|insufficient_|variant_|channel_|pickup_|delivery_|rate_limited|too_many_)/.test(error.message)) console.error("place_order:", error.message);
     return { ok: false, error: friendly(error.message) };
   }
   const order = data as {
@@ -144,8 +152,14 @@ export async function submitTradeIn(_: TradeInState, form: FormData): Promise<Tr
   const parsed = tradeInSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: "Preencha nome, celular, modelo e estado do aparelho e aceite a política de privacidade." };
   const { privacy: _p, ...payload } = parsed.data;
-  const { error } = await anonClient().rpc("submit_trade_in", { payload: { ...payload, battery_health: payload.battery_health || "" } });
-  if (error) return { error: error.message.startsWith("invalid") ? "Confira os dados informados (celular com DDD)." : "Não foi possível enviar agora. Tente novamente." };
+  const { error } = await serviceClient().rpc("submit_trade_in_limited", {
+    payload: { ...payload, battery_health: payload.battery_health || "" },
+    client_ip: await clientIp(),
+  });
+  if (error) {
+    if (error.message.startsWith("rate_limited")) return { error: ERRORS.rate_limited };
+    return { error: error.message.startsWith("invalid") ? "Confira os dados informados (celular com DDD)." : "Não foi possível enviar agora. Tente novamente." };
+  }
   const s = await getSettings();
   const p = parsed.data;
   const text = `Olá, ${s.brand.name}! Enviei pelo site um pedido de avaliação do meu ${p.device_model}${p.storage ? ` ${p.storage}` : ""}${p.battery_health ? `, bateria ${p.battery_health}%` : ""}. Estado: ${p.device_condition}${p.desired_product ? `. Tenho interesse em: ${p.desired_product}` : ""}.`;
