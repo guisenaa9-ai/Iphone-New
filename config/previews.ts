@@ -8,7 +8,7 @@ export const PREVIEWS: Record<string, unknown> = {
     brand: {
       name: "Rampage",
       tagline: "iPhones novos e seminovos no Adrianópolis, com troca do seu usado.",
-      accent: "#c81e1e",
+      accent: "#1a66f5",
       font: "jakarta",
       theme: "dark",
     },
