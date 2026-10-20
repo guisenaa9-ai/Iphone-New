@@ -12,10 +12,14 @@ let anon: SupabaseClient;
 let service: SupabaseClient;
 let variant: { id: string; price_cents: number; stock: number };
 
+const phone = () => `9299${String(Math.floor(Math.random() * 1e7)).padStart(7, "0")}`;
+const place = (payload: unknown, client_ip: string | null = null) => service.rpc("place_order_limited", { payload, client_ip });
+// release_order só vale para pedido online; o de WhatsApp volta ao estoque pelo prazo, na próxima chamada.
+const expire = (ids: string[]) => service.from("orders").update({ created_at: new Date(Date.now() - 13 * 3600_000).toISOString() }).in("id", ids);
 const order = (over: Record<string, unknown> = {}) => ({
   channel: "whatsapp",
   fulfillment: "pickup",
-  customer: { name: "Cliente Teste", phone: "92991234567" },
+  customer: { name: "Cliente Teste", phone: phone() }, // telefone novo: o limite de pedidos abertos é por telefone
   items: [{ variant_id: variant.id, quantity: 1 }],
   ...over,
 });
@@ -38,7 +42,7 @@ describe.runIf(process.env.SUPABASE_TEST === "1")("banco de dados", () => {
   });
 
   it("preço vem do banco e o estoque é baixado", async () => {
-    const { data, error } = await anon.rpc("place_order", { payload: order({ items: [{ variant_id: variant.id, quantity: 2, unit_price_cents: 1 }] }) });
+    const { data, error } = await place(order({ items: [{ variant_id: variant.id, quantity: 2, unit_price_cents: 1 }] }));
     expect(error).toBeNull();
     expect(data.total_cents).toBe(variant.price_cents * 2);
     const { data: after } = await service.from("product_variants").select("stock").eq("id", variant.id).single();
@@ -49,19 +53,19 @@ describe.runIf(process.env.SUPABASE_TEST === "1")("banco de dados", () => {
   it("recusa estoque insuficiente sem criar pedido", async () => {
     const { data: scarce } = await service.from("product_variants").select("id, stock").gt("stock", 0).lt("stock", 10).limit(1).single();
     const before = (await service.from("orders").select("id", { count: "exact", head: true })).count;
-    const { error } = await anon.rpc("place_order", { payload: order({ items: [{ variant_id: scarce!.id, quantity: 10 }] }) });
+    const { error } = await place(order({ items: [{ variant_id: scarce!.id, quantity: 10 }] }));
     expect(error?.message).toMatch(/^insufficient_stock/);
     expect((await service.from("orders").select("id", { count: "exact", head: true })).count).toBe(before);
     expect((await service.from("product_variants").select("stock").eq("id", scarce!.id).single()).data!.stock).toBe(scarce!.stock);
   });
 
   it("valida telefone e entrega", async () => {
-    expect((await anon.rpc("place_order", { payload: order({ customer: { name: "A B", phone: "123" } }) })).error?.message).toBe("invalid_phone");
-    expect((await anon.rpc("place_order", { payload: order({ fulfillment: "delivery" }) })).error?.message).toMatch(/invalid_zone|delivery_disabled/);
+    expect((await place(order({ customer: { name: "A B", phone: "123" } }))).error?.message).toBe("invalid_phone");
+    expect((await place(order({ fulfillment: "delivery" }))).error?.message).toMatch(/invalid_zone|delivery_disabled/);
   });
 
   it("visitante não confirma pagamento nem muda status", async () => {
-    const { data } = await anon.rpc("place_order", { payload: order() });
+    const { data } = await place(order());
     expect((await anon.rpc("confirm_payment", { order_id: data.id, provider: "x", provider_payment_id: "1", provider_status: "approved", amount_cents: data.total_cents })).error).not.toBeNull();
     expect((await anon.rpc("admin_set_order_status", { order_id: data.id, new_status: "paid" })).error).not.toBeNull();
     const { data: pub } = await anon.rpc("get_order_public", { order_id: data.id });
@@ -71,7 +75,7 @@ describe.runIf(process.env.SUPABASE_TEST === "1")("banco de dados", () => {
   it("pagamento só aprova com valor exato", async () => {
     const { data: s } = await service.from("store_settings").select("data").eq("id", 1).single();
     await service.from("store_settings").update({ data: { ...s!.data, commerce: { ...s!.data.commerce, salesMode: "both" } } }).eq("id", 1);
-    const { data, error: placeErr } = await anon.rpc("place_order", { payload: order({ channel: "online" }) });
+    const { data, error: placeErr } = await place(order({ channel: "online" }));
     expect(placeErr).toBeNull();
     expect((await service.rpc("confirm_payment", { order_id: data.id, provider: "mercadopago", provider_payment_id: "9", provider_status: "approved", amount_cents: data.total_cents - 1 })).data).toBe("amount_mismatch");
     expect((await service.rpc("confirm_payment", { order_id: data.id, provider: "mercadopago", provider_payment_id: "9", provider_status: "approved", amount_cents: data.total_cents })).data).toBe("paid");
@@ -84,7 +88,7 @@ describe.runIf(process.env.SUPABASE_TEST === "1")("banco de dados", () => {
     const { data: s } = await service.from("store_settings").select("data").eq("id", 1).single();
     await service.from("store_settings").update({ data: { ...s!.data, commerce: { ...s!.data.commerce, salesMode: "both" } } }).eq("id", 1);
     const before = (await service.from("product_variants").select("stock").eq("id", variant.id).single()).data!.stock;
-    const { data, error: placeErr } = await anon.rpc("place_order", { payload: order({ channel: "online" }) });
+    const { data, error: placeErr } = await place(order({ channel: "online" }));
     expect(placeErr).toBeNull();
     await service.rpc("release_order", { order_id: data.id });
     const after = (await service.from("product_variants").select("stock").eq("id", variant.id).single()).data!.stock;
@@ -93,15 +97,47 @@ describe.runIf(process.env.SUPABASE_TEST === "1")("banco de dados", () => {
     await service.from("store_settings").update({ data: s!.data }).eq("id", 1);
   });
 
-  it("pedido de WhatsApp abandonado devolve o estoque após 48h", async () => {
+  it("pedido de WhatsApp abandonado devolve o estoque após 12h", async () => {
     const stockOf = async () => (await service.from("product_variants").select("stock").eq("id", variant.id).single()).data!.stock;
     const before = await stockOf();
-    const { data } = await anon.rpc("place_order", { payload: order() });
+    const { data } = await place(order());
     expect(await stockOf()).toBe(before - 1);
-    await service.from("orders").update({ created_at: new Date(Date.now() - 49 * 3600_000).toISOString() }).eq("id", data.id);
-    const { data: next } = await anon.rpc("place_order", { payload: order() }); // dispara a limpeza
+    await service.from("orders").update({ created_at: new Date(Date.now() - 13 * 3600_000).toISOString() }).eq("id", data.id);
+    const { data: next } = await place(order()); // dispara a limpeza
     expect((await anon.rpc("get_order_public", { order_id: data.id })).data.status).toBe("canceled");
     expect(await stockOf()).toBe(before - 1); // só o pedido novo segura estoque
     await service.rpc("release_order", { order_id: next.id });
+  });
+
+  it("visitante não chama as funções de pedido e troca direto", async () => {
+    expect((await anon.rpc("place_order", { payload: order() })).error).not.toBeNull();
+    expect((await anon.rpc("place_order_limited", { payload: order(), client_ip: null })).error).not.toBeNull();
+    expect((await anon.rpc("submit_trade_in", { payload: {} })).error).not.toBeNull();
+  });
+
+  it("limita pedidos por IP (IPv6 conta o /64 inteiro)", async () => {
+    const net = `2001:db8:${Math.floor(Math.random() * 0xffff).toString(16)}:1`;
+    const ids: string[] = [];
+    for (let i = 1; i <= 5; i++) {
+      const { data, error } = await place(order(), `${net}::${i}`);
+      expect(error).toBeNull();
+      ids.push(data.id);
+    }
+    expect((await place(order(), `${net}::99`)).error?.message).toBe("rate_limited");
+    await expire(ids);
+  });
+
+  it("limita pedidos abertos por telefone", async () => {
+    const customer = { name: "Cliente Teste", phone: phone() };
+    const a = await place(order({ customer }));
+    const b = await place(order({ customer }));
+    expect((await place(order({ customer }))).error?.message).toBe("too_many_open_orders");
+    await expire([a.data.id, b.data.id]);
+  });
+
+  it("limita pedidos de troca por telefone", async () => {
+    const payload = { name: "Cliente Teste", phone: phone(), device_model: "iPhone 12", device_condition: "Bom estado" };
+    for (let i = 0; i < 3; i++) expect((await service.rpc("submit_trade_in_limited", { payload, client_ip: null })).error).toBeNull();
+    expect((await service.rpc("submit_trade_in_limited", { payload, client_ip: null })).error?.message).toBe("rate_limited");
   });
 });
