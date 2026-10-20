@@ -121,7 +121,6 @@ export default async function Home() {
       )}
 
       <ProductShelf title="Todos os modelos." tagline="Escolha o seu." href="/catalogo?categoria=iphone" products={featured} commerce={c} />
-      <ProductShelf title="Lançamentos." tagline="Os modelos mais recentes." href="/catalogo?ordem=novidades" products={products.filter((p) => p.is_launch)} commerce={c} />
       <ProductShelf title="Mais vendidos." tagline="Os preferidos dos clientes." products={best} commerce={c} />
       <ProductShelf title="Ofertas." tagline="Preços especiais." href="/catalogo?ofertas=1" products={products.filter(onSale)} commerce={c} id="ofertas" />
       <ProductShelf title="Seminovos." tagline="Condição e bateria informadas." href="/catalogo?condicao=seminovo" products={products.filter(isUsed)} commerce={c} />
