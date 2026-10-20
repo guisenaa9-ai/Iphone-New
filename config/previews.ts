@@ -22,6 +22,7 @@ export const PREVIEWS: Record<string, unknown> = {
       mapsUrl: "https://www.google.com/maps/search/?api=1&query=Av.%20Andr%C3%A9%20Ara%C3%BAjo%2C%2097%2C%20Adrian%C3%B3polis%2C%20Manaus",
       phone: "",
       email: "",
+      hours: "", // horário real ainda não informado; não herdar o fictício da demo
       instagram: "",
       facebook: "https://www.facebook.com/p/Loja-Rampage-Manaus-100092506297209/",
       tiktok: "",
