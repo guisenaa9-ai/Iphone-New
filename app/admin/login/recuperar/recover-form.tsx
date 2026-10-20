@@ -21,7 +21,7 @@ export function RecoverForm() {
       <div className="grid w-full max-w-sm gap-5 rounded-[28px] bg-surface p-8 shadow-card ring-1 ring-border">
         <h1 className="text-headline">Confira seu e-mail</h1>
         <p role="status" className="text-[14px] text-muted">
-          Se o e-mail for de um administrador, você vai receber um link para criar uma nova senha. Abra o link neste mesmo navegador. Ele vale por 1 hora.
+          Se o e-mail for de um administrador, você vai receber um link para criar uma nova senha. O link vale por 1 hora.
         </p>
         {back}
       </div>

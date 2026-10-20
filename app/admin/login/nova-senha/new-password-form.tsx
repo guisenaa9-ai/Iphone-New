@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { browserClient } from "@/lib/supabase/browser";
@@ -15,11 +15,19 @@ export function NewPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  const started = useRef(false);
+
   useEffect(() => {
-    // O cliente troca o ?code= do link por uma sessão ao iniciar; getSession espera essa troca.
-    browserClient()
-      .auth.getSession()
-      .then(({ data }) => setState(data.session ? "ready" : "invalid"));
+    if (started.current) return; // o token do link só vale uma vez
+    started.current = true;
+    const auth = browserClient().auth;
+    // ?token_hash= vem do modelo de e-mail do Supabase e funciona em qualquer aparelho.
+    // Sem ele, o cliente troca o ?code= (PKCE) ao iniciar, o que só vale no navegador que pediu o link.
+    const tokenHash = new URLSearchParams(window.location.search).get("token_hash");
+    const session = tokenHash
+      ? auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ data }) => data.session)
+      : auth.getSession().then(({ data }) => data.session);
+    session.then((s) => setState(s ? "ready" : "invalid"));
   }, []);
 
   if (state === "checking") return <p className="text-muted">Verificando o link…</p>;
@@ -27,7 +35,7 @@ export function NewPasswordForm() {
     return (
       <div className="grid w-full max-w-sm gap-5 rounded-[28px] bg-surface p-8 shadow-card ring-1 ring-border">
         <h1 className="text-headline">Link inválido ou expirado</h1>
-        <p role="alert" className="text-[14px] text-muted">Peça um novo link e abra-o neste mesmo navegador.</p>
+        <p role="alert" className="text-[14px] text-muted">Os links valem por 1 hora e só funcionam uma vez. Peça um novo.</p>
         <Link href="/admin/login/recuperar" className="justify-self-center text-[14px] underline underline-offset-4">Pedir novo link</Link>
       </div>
     );
