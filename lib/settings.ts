@@ -6,7 +6,12 @@ import { z } from "zod";
 // sem telefone, endereço ou condição comercial inventada.
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Use uma cor no formato #RRGGBB");
-const url = z.union([z.literal(""), z.string().url("URL inválida").max(500)]);
+// Aceita URL completa ou arquivo do próprio site (ex.: /previews/rampage.jpg).
+const url = z.union([
+  z.literal(""),
+  z.string().max(500).regex(/^https?:\/\/[^\s"<>]+$/i, "Use um link que comece com https://"),
+  z.string().regex(/^\/[\w\-./]+$/, "URL inválida"),
+]);
 const href = z.string().max(300);
 const text = (max: number) => z.string().max(max);
 
@@ -23,6 +28,9 @@ export const settingsSchema = z.object({
     tagline: text(120),
     logoUrl: url,
     logoDarkUrl: url,
+    logoWithName: z.boolean(), // logotipo só com ícone (comum em perfis do Instagram)
+    headerFrom: z.union([z.literal(""), hex]), // degradê do cabeçalho; vazio = cabeçalho padrão
+    headerTo: z.union([z.literal(""), hex]),
     faviconUrl: url,
     accent: hex,
     font: z.enum(Object.keys(FONT_OPTIONS) as [keyof typeof FONT_OPTIONS]),
@@ -102,6 +110,9 @@ export const DEFAULT_SETTINGS: StoreSettings = {
     tagline: "",
     logoUrl: "",
     logoDarkUrl: "",
+    logoWithName: false,
+    headerFrom: "",
+    headerTo: "",
     faviconUrl: "",
     accent: "#0a84ff",
     font: "inter",
@@ -192,3 +203,6 @@ export function activeBanners(s: StoreSettings, today = new Date().toISOString()
     (b) => b.active && (!b.startsAt || b.startsAt <= today) && (!b.endsAt || b.endsAt >= today),
   );
 }
+
+/** Aplica um ajuste parcial (ex.: prévia de prospecção) sobre a configuração já resolvida. */
+export const withOverrides = (base: StoreSettings, over: unknown) => resolveSettings(merge(base, over));

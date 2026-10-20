@@ -71,3 +71,27 @@ describe("mensagem do WhatsApp", () => {
     expect(waLink("+55 (92) 99999-0000", "Olá & tchau")).toBe("https://wa.me/5592999990000?text=Ol%C3%A1%20%26%20tchau");
   });
 });
+
+describe("prévias de prospecção", () => {
+  it("aplicam marca e textos sem perder o resto da configuração", async () => {
+    const { PREVIEWS } = await import("@/config/previews");
+    const { withOverrides } = await import("@/lib/settings");
+    const base = resolveSettings({ contact: { whatsapp: "5592900000000" }, commerce: { installmentsMax: 12 } });
+    for (const [key, preset] of Object.entries(PREVIEWS)) {
+      const s = withOverrides(base, preset);
+      expect(s.brand.name, key).not.toBe(DEFAULT_SETTINGS.brand.name);
+      expect(s.content.demoNotice, key).toBe(true); // prévia nunca se passa por loja real
+      expect(s.contact.whatsapp, key).toBe("5592900000000"); // pedidos não vão para a loja
+      expect(s.commerce.installmentsMax, key).toBe(12);
+    }
+  });
+});
+
+describe("URLs de imagem", () => {
+  it("aceitam arquivo do próprio site e recusam caminhos estranhos", () => {
+    expect(resolveSettings({ brand: { logoUrl: "/previews/rampage.jpg" } }).brand.logoUrl).toBe("/previews/rampage.jpg");
+    expect(resolveSettings({ brand: { logoUrl: "javascript:alert(1)" } }).brand.logoUrl).toBe("");
+    expect(resolveSettings({ brand: { logoUrl: "/a b\"onerror=x" } }).brand.logoUrl).toBe("");
+    expect(resolveSettings({ contact: { mapsUrl: "https://maps.app.goo.gl/abc" } }).contact.mapsUrl).toBe("https://maps.app.goo.gl/abc");
+  });
+});

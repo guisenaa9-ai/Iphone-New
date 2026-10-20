@@ -83,6 +83,7 @@ export function SettingsForm({ initial, paymentsReady }: { initial: StoreSetting
               {single(b.faviconUrl, (u) => set("brand", { faviconUrl: u }), "Ícone da aba (favicon)", "brand")}
             </div>
             <p className="-mt-2 text-[13px] text-muted">Sem logotipo, o nome da loja aparece em texto.</p>
+            <Toggle label="Mostrar o nome ao lado do logotipo" description="Para logotipos que são só um ícone, como a foto do perfil do Instagram." checked={b.logoWithName} onChange={(e) => set("brand", { logoWithName: e.target.checked })} />
           </Card>
           <Card title="Aparência" hint="A cor de destaque é usada com moderação: botões principais, selos de oferta e foco.">
             <div className="grid gap-5 md:grid-cols-3">
@@ -104,6 +105,22 @@ export function SettingsForm({ initial, paymentsReady }: { initial: StoreSetting
                   <option value="dark">Sempre escuro</option>
                 </Select>
               </Field>
+            </div>
+            <div className="grid gap-5 md:grid-cols-3">
+              {(["headerFrom", "headerTo"] as const).map((k) => (
+                <Field key={k} label={k === "headerFrom" ? "Cabeçalho em degradê: cor inicial" : "Cabeçalho em degradê: cor final"} htmlFor={`b-${k}`}
+                  hint={b[k] ? `Texto branco: contraste ${contrast(b[k], "#ffffff").toFixed(1)}:1${contrast(b[k], "#ffffff") < 4.5 ? " — escureça este tom" : ""}` : "Deixe as duas vazias para o cabeçalho padrão."}>
+                  <div className="flex gap-2">
+                    <input type="color" value={b[k] || "#1a3fd6"} onChange={(e) => set("brand", { [k]: e.target.value })} aria-label="Escolher cor" className="h-11 w-14 cursor-pointer rounded-[10px] ring-1 ring-border" />
+                    <Input id={`b-${k}`} value={b[k]} placeholder="vazio" pattern="#[0-9a-fA-F]{6}" onChange={(e) => set("brand", { [k]: e.target.value })} />
+                  </div>
+                </Field>
+              ))}
+              {b.headerFrom && b.headerTo && (
+                <div className="flex h-11 items-center gap-2 self-end rounded-[12px] px-4 text-[15px] font-semibold text-white" style={{ background: `linear-gradient(90deg, ${b.headerFrom}, ${b.headerTo})` }} aria-hidden>
+                  {b.name}
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-3 rounded-[16px] bg-bg-subtle p-4" style={{ fontFamily: `var(--font-${b.font})` }}>
               <span className="text-[13px] text-muted">Prévia:</span>

@@ -99,6 +99,8 @@ function Front({ spec, color, id }: { spec: PhoneSpec; color: string; id: string
       </clipPath>
       <g clipPath={`url(#scr-${id})`}>
         <rect width={W} height={H} fill={`url(#wall-${id})`} />
+        {/* Reflexo que atravessa a tela; só anima no hero (ver .hero-phone em globals.css). */}
+        <rect className="phone-sheen" x="-150" y="-40" width="110" height={H + 80} fill={`url(#sheen-${id})`} transform="skewX(-18)" />
         <path d="M-20 330 C 60 250, 140 420, 260 250 L 260 520 L -20 520 Z" fill={shade(color, 70)} opacity="0.55" />
         <path d="M-20 400 C 80 330, 150 470, 260 360 L 260 520 L -20 520 Z" fill={shade(color, 110)} opacity="0.35" />
       </g>
@@ -150,6 +152,11 @@ export function PhoneArt({ color = "#2b2b2e", name = "", className = "" }: { col
         <filter id={`raise-${id}`} x="-30%" y="-30%" width="160%" height="160%">
           <feDropShadow dx="1.5" dy="3" stdDeviation="2.5" floodOpacity="0.4" />
         </filter>
+        <linearGradient id={`sheen-${id}`} x1="0" x2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0" />
+          <stop offset="0.5" stopColor="#fff" stopOpacity="0.35" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
         <radialGradient id={`lens-${id}`} cx="0.4" cy="0.35" r="0.7">
           <stop offset="0" stopColor="#4a5a78" />
           <stop offset="0.35" stopColor="#111522" />
@@ -161,10 +168,14 @@ export function PhoneArt({ color = "#2b2b2e", name = "", className = "" }: { col
       </defs>
       <g transform={`translate(220 300) scale(${scale}) translate(-220 -300)`} filter={`url(#soft-${id})`}>
         <g transform="translate(20 20)">
-          <Back spec={spec} color={color} id={id} />
+          <g className="phone-back">
+            <Back spec={spec} color={color} id={id} />
+          </g>
         </g>
         <g transform="translate(180 80)">
-          <Front spec={spec} color={color} id={id} />
+          <g className="phone-front">
+            <Front spec={spec} color={color} id={id} />
+          </g>
         </g>
       </g>
     </svg>

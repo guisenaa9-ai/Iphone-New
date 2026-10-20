@@ -10,17 +10,20 @@ import { waLink } from "@/lib/whatsapp";
 
 export type NavLink = { href: string; label: string };
 
-export function Logo({ name, logoUrl, logoDarkUrl }: { name: string; logoUrl: string; logoDarkUrl: string }) {
-  if (!logoUrl) return <span className="text-[17px] font-semibold tracking-[-0.02em]">{name}</span>;
+export function Logo({ name, logoUrl, logoDarkUrl, logoWithName }: { name: string; logoUrl: string; logoDarkUrl: string; logoWithName: boolean }) {
+  const text = <span className="text-[17px] font-semibold tracking-[-0.02em]">{name}</span>;
+  if (!logoUrl) return text;
+  const alt = logoWithName ? "" : name; // com o nome ao lado, a imagem é decorativa
   return (
-    <>
+    <span className="flex items-center gap-2.5">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={logoUrl} alt={name} className={`h-7 w-auto ${logoDarkUrl ? "dark-hide" : ""}`} />
+      <img src={logoUrl} alt={alt} className={`h-7 w-auto ${logoWithName ? "rounded-full ring-1 ring-white/40" : ""} ${logoDarkUrl ? "dark-hide" : ""}`} />
       {logoDarkUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoDarkUrl} alt={name} className="dark-show h-7 w-auto" />
+        <img src={logoDarkUrl} alt={alt} className={`dark-show h-7 w-auto ${logoWithName ? "rounded-full ring-1 ring-white/40" : ""}`} />
       )}
-    </>
+      {logoWithName && text}
+    </span>
   );
 }
 
@@ -30,7 +33,7 @@ export function Header({
   whatsapp,
   searchItems,
 }: {
-  brand: { name: string; logoUrl: string; logoDarkUrl: string };
+  brand: { name: string; logoUrl: string; logoDarkUrl: string; logoWithName: boolean; headerFrom: string; headerTo: string };
   nav: NavLink[];
   whatsapp: string;
   searchItems: SearchItem[];
@@ -63,12 +66,16 @@ export function Header({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Degradê da marca: os dois tons precisam segurar texto branco (o painel mostra o contraste).
+  const gradient = brand.headerFrom && brand.headerTo ? `linear-gradient(90deg, ${brand.headerFrom}, ${brand.headerTo})` : null;
   const iconBtn = "grid size-11 place-items-center rounded-full text-fg transition-colors duration-200 hover:bg-bg-subtle";
 
   return (
     <>
       <header
-        className={`theme-dark sticky top-0 z-40 text-fg transition-[background-color,box-shadow] duration-300 ${scrolled && !menu ? "glass shadow-[0_1px_0_var(--border)]" : "bg-bg"}`}
+        className={`theme-dark sticky top-0 z-40 text-fg transition-[background-color,box-shadow] duration-300 ${gradient ? "shadow-[0_1px_0_var(--border)]" : scrolled && !menu ? "glass shadow-[0_1px_0_var(--border)]" : "bg-bg"}`}
+        // Sobre o degradê, tons secundários viram branco translúcido para manter a leitura.
+        style={gradient ? ({ background: gradient, "--fg-muted": "rgb(255 255 255 / 0.92)", "--border": "rgb(255 255 255 / 0.3)", "--bg-subtle": "rgb(255 255 255 / 0.16)" } as React.CSSProperties) : undefined}
       >
         <a href="#conteudo" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-full focus:bg-fg focus:px-4 focus:py-2 focus:text-bg">
           Ir para o conteúdo

@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { publicClient } from "./supabase/public";
-import { resolveSettings } from "./settings";
+import { PREVIEWS } from "@/config/previews";
+import { resolveSettings, withOverrides } from "./settings";
 
 export type Condition = "novo" | "seminovo" | "recondicionado";
 export type Category = "iphone" | "ipad" | "mac" | "watch" | "airpods" | "acessorio";
@@ -60,7 +61,9 @@ export const PRODUCT_SELECT = "*, variants:product_variants(*)";
 export const getSettings = cache(async () => {
   const { data, error } = await publicClient().from("store_settings").select("data").eq("id", 1).maybeSingle();
   if (error) console.error("settings:", error.message);
-  return resolveSettings(data?.data ?? {});
+  const base = resolveSettings(data?.data ?? {});
+  const preset = PREVIEWS[process.env.PREVIEW_PRESET ?? ""];
+  return preset ? withOverrides(base, preset) : base;
 });
 
 function normalize(p: Product): Product {

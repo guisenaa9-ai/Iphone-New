@@ -22,7 +22,7 @@ function done(id?: string): ActionResult {
   return { ok: true, id };
 }
 
-const imageUrl = z.string().url().max(500);
+const imageUrl = z.string().max(500).regex(/^https:\/\/[^\s"<>]+$/i, "Use um link https://");
 
 const variantSchema = z
   .object({
