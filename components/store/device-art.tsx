@@ -22,20 +22,30 @@ const R = 42;
 function Lens({ x, y, r, id, color }: { x: number; y: number; r: number; id: string; color: string }) {
   return (
     <g>
-      <circle cx={x} cy={y} r={r + 4} fill={shade(color, -55)} />
+      <circle cx={x} cy={y} r={r + 5} fill={`url(#ring-${id})`} filter={`url(#raise-${id})`} />
+      <circle cx={x} cy={y} r={r + 1.5} fill={shade(color, -70)} />
       <circle cx={x} cy={y} r={r} fill={`url(#lens-${id})`} />
       <circle cx={x - r * 0.3} cy={y - r * 0.35} r={r * 0.18} fill="#fff" opacity="0.4" />
     </g>
   );
 }
 
+/** Módulo de câmera em relevo: sombra projetada, degradê e brilho na borda superior. */
+function Bump({ x, y, w, h, r, id }: { x: number; y: number; w: number; h: number; r: number; id: string }) {
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx={r} fill={`url(#bump-${id})`} filter={`url(#raise-${id})`} />
+      <rect x={x + 0.75} y={y + 0.75} width={w - 1.5} height={h - 1.5} rx={r - 0.75} fill="none" stroke={`url(#rim-${id})`} strokeWidth="1.5" />
+    </g>
+  );
+}
+
 function Back({ spec, color, id }: { spec: PhoneSpec; color: string; id: string }) {
-  const bump = shade(color, 16);
   const flash = <circle r="6" fill="#f3ead2" opacity="0.85" />;
   const cams = {
     triple: (
       <>
-        <rect x="18" y="18" width="112" height="112" rx="30" fill={bump} stroke="#fff" strokeOpacity="0.22" />
+        <Bump x={18} y={18} w={112} h={112} r={30} id={id} />
         <Lens x={48} y={48} r={17} id={id} color={color} />
         <Lens x={48} y={100} r={17} id={id} color={color} />
         <Lens x={100} y={74} r={17} id={id} color={color} />
@@ -45,7 +55,7 @@ function Back({ spec, color, id }: { spec: PhoneSpec; color: string; id: string 
     ),
     diagonal: (
       <>
-        <rect x="18" y="18" width="96" height="96" rx="26" fill={bump} stroke="#fff" strokeOpacity="0.22" />
+        <Bump x={18} y={18} w={96} h={96} r={26} id={id} />
         <Lens x={44} y={44} r={15} id={id} color={color} />
         <Lens x={88} y={88} r={15} id={id} color={color} />
         <g transform="translate(90 42)">{flash}</g>
@@ -53,7 +63,7 @@ function Back({ spec, color, id }: { spec: PhoneSpec; color: string; id: string 
     ),
     vertical: (
       <>
-        <rect x="20" y="18" width="52" height="108" rx="26" fill={bump} stroke="#fff" strokeOpacity="0.22" />
+        <Bump x={20} y={18} w={52} h={108} r={26} id={id} />
         <Lens x={46} y={45} r={15} id={id} color={color} />
         <Lens x={46} y={99} r={15} id={id} color={color} />
         <g transform="translate(90 34)">{flash}</g>
@@ -122,6 +132,23 @@ export function PhoneArt({ color = "#2b2b2e", name = "", className = "" }: { col
           <stop offset="0" stopColor={shade(color, -70)} />
           <stop offset="1" stopColor={shade(color, 10)} />
         </linearGradient>
+        <linearGradient id={`bump-${id}`} x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor={shade(color, 34)} />
+          <stop offset="1" stopColor={shade(color, -22)} />
+        </linearGradient>
+        <linearGradient id={`rim-${id}`} x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.7" />
+          <stop offset="0.5" stopColor="#fff" stopOpacity="0" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.35" />
+        </linearGradient>
+        <linearGradient id={`ring-${id}`} x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor={shade(color, 70)} />
+          <stop offset="0.5" stopColor={shade(color, -10)} />
+          <stop offset="1" stopColor={shade(color, -80)} />
+        </linearGradient>
+        <filter id={`raise-${id}`} x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="1.5" dy="3" stdDeviation="2.5" floodOpacity="0.4" />
+        </filter>
         <radialGradient id={`lens-${id}`} cx="0.4" cy="0.35" r="0.7">
           <stop offset="0" stopColor="#4a5a78" />
           <stop offset="0.35" stopColor="#111522" />
