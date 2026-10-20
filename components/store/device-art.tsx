@@ -3,6 +3,7 @@
 import { Cable, Headphones, Laptop, Tablet, Watch } from "lucide-react";
 import { useId } from "react";
 import type { Category } from "@/lib/catalog";
+import { readableOn } from "@/lib/color";
 import { phoneSpec, type PhoneSpec } from "@/lib/phone-spec";
 
 // Ilustração original (SVG) usada quando a loja ainda não enviou fotos.
@@ -183,7 +184,7 @@ export function DeviceArt({ category, color, name, className = "" }: { category:
         className="grid aspect-square w-3/5 place-items-center rounded-[32%] shadow-card ring-1 ring-border"
         style={{ background: color ? `linear-gradient(145deg, ${shade(color, 30)}, ${color})` : "var(--surface)" }}
       >
-        <Icon className="size-2/5" strokeWidth={1.25} color={color ? "#fff" : "currentColor"} />
+        <Icon className="size-2/5" strokeWidth={1.25} color={color ? readableOn(color) : "currentColor"} />
       </span>
     </div>
   );

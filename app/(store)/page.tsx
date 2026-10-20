@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, MessageCircle, Repeat, Star } from "lucide-react";
+import { ArrowRight, CircleCheck, MessageCircle, Repeat, Star } from "lucide-react";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { PhoneArt } from "@/components/store/device-art";
@@ -121,23 +121,23 @@ export default async function Home() {
       )}
 
       <ProductShelf title="Todos os modelos." tagline="Escolha o seu." href="/catalogo?categoria=iphone" products={featured} commerce={c} />
-      <ProductShelf title="Lançamentos." tagline="O mais novo da Apple." href="/catalogo?ordem=novidades" products={products.filter((p) => p.is_launch)} commerce={c} />
+      <ProductShelf title="Lançamentos." tagline="Os modelos mais recentes." href="/catalogo?ordem=novidades" products={products.filter((p) => p.is_launch)} commerce={c} />
       <ProductShelf title="Mais vendidos." tagline="Os preferidos dos clientes." products={best} commerce={c} />
-      <ProductShelf eyebrow="Ofertas" title="Ofertas especiais" href="/catalogo?ofertas=1" products={products.filter(onSale)} commerce={c} id="ofertas" />
-      <ProductShelf eyebrow="Seminovos" title="iPhones seminovos" href="/catalogo?condicao=seminovo" products={products.filter(isUsed)} commerce={c} />
-      <ProductShelf eyebrow="Complete o seu setup" title="Acessórios" href="/catalogo?categoria=acessorio" products={products.filter((p) => p.category === "acessorio")} commerce={c} />
+      <ProductShelf title="Ofertas." tagline="Preços especiais." href="/catalogo?ofertas=1" products={products.filter(onSale)} commerce={c} id="ofertas" />
+      <ProductShelf title="Seminovos." tagline="Condição e bateria informadas." href="/catalogo?condicao=seminovo" products={products.filter(isUsed)} commerce={c} />
+      <ProductShelf title="Acessórios." tagline="Complete o seu setup." href="/catalogo?categoria=acessorio" products={products.filter((p) => p.category === "acessorio")} commerce={c} />
 
       {s.content.benefits.length > 0 && (
         <Section>
-          <SectionHeader eyebrow={`Por que a ${s.brand.name}`} title="Compre com tranquilidade" />
+          <SectionHeader title="Compre com tranquilidade." tagline={`Por que a ${s.brand.name}.`} />
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {s.content.benefits.map((b, i) => (
-              <li key={i} className="grid gap-2 rounded-[24px] bg-bg-subtle p-7">
-                <span aria-hidden className="mb-3 grid size-10 place-items-center rounded-full bg-accent text-[15px] font-semibold text-accent-fg">
-                  {i + 1}
-                </span>
-                <h3 className="text-headline">{b.title}</h3>
-                {b.text && <p className="text-[15px] leading-relaxed text-muted">{b.text}</p>}
+              <li key={i} className="flex gap-4 rounded-[24px] bg-bg-subtle p-6">
+                <CircleCheck aria-hidden className="mt-0.5 size-6 shrink-0 text-accent" strokeWidth={1.75} />
+                <div className="grid content-start gap-1.5">
+                  <h3 className="text-headline">{b.title}</h3>
+                  {b.text && <p className="text-[15px] leading-relaxed text-muted">{b.text}</p>}
+                </div>
               </li>
             ))}
           </ul>
@@ -145,11 +145,11 @@ export default async function Home() {
       )}
 
       <Section>
-        <div className="grid items-center gap-8 overflow-hidden rounded-[32px] bg-fg p-8 text-bg sm:p-12 lg:grid-cols-[1.4fr_1fr]">
+        <div className="grid items-center gap-8 overflow-hidden rounded-[32px] bg-surface p-8 ring-1 ring-border sm:p-12 lg:grid-cols-[1.4fr_1fr]">
           <div className="grid gap-4">
-            <Repeat aria-hidden className="size-8 opacity-80" />
+            <Repeat aria-hidden className="size-8 text-accent" />
             <h2 className="text-title">Seu aparelho pode valer como entrada.</h2>
-            <p className="max-w-lg text-[17px] leading-relaxed opacity-75">
+            <p className="max-w-lg text-[17px] leading-relaxed text-muted">
               Conte o modelo e o estado do seu aparelho atual. A equipe avalia e responde com uma proposta — sem compromisso.
             </p>
           </div>
@@ -163,7 +163,7 @@ export default async function Home() {
 
       {reviews.length > 0 && (
         <Section>
-          <SectionHeader eyebrow="Avaliações" title="Quem comprou, recomenda" />
+          <SectionHeader title="Quem comprou," tagline="recomenda." />
           <ul className="grid gap-3 md:grid-cols-3">
             {reviews.map((r) => (
               <li key={r.id} className="grid content-start gap-4 rounded-[24px] bg-bg-subtle p-7">
@@ -186,7 +186,7 @@ export default async function Home() {
       {s.content.faq.length > 0 && (
         <Section id="faq">
           <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
-            <SectionHeader eyebrow="Dúvidas" title="Perguntas frequentes" />
+            <SectionHeader title="Perguntas frequentes." tagline="Respostas rápidas." />
             <div className="divide-y divide-border border-y border-border">
               {s.content.faq.map((f, i) => (
                 <details key={i} className="group">
