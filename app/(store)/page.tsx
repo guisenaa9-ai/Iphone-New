@@ -74,7 +74,7 @@ export default async function Home() {
             {s.hero.imageUrl ? (
               <Image src={s.hero.imageUrl} alt="" fill priority sizes="(min-width: 640px) 480px, 90vw" className="hero-in object-contain" unoptimized={!s.hero.imageUrl.includes("/storage/v1/object/public/")} />
             ) : (
-              <div className="hero-float absolute inset-x-[4%] top-[2%]">
+              <div className="hero-phone absolute inset-x-[4%] top-[2%]">
                 <PhoneArt color={heroColors[0]?.hex ?? "#3a4150"} name={heroProduct?.name} />
               </div>
             )}
