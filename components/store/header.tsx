@@ -68,7 +68,7 @@ export function Header({
   return (
     <>
       <header
-        className={`sticky top-0 z-40 transition-[background-color,box-shadow] duration-300 ${scrolled || menu ? "glass shadow-[0_1px_0_var(--border)]" : "bg-bg"}`}
+        className={`theme-dark sticky top-0 z-40 text-fg transition-[background-color,box-shadow] duration-300 ${scrolled || menu ? "glass shadow-[0_1px_0_var(--border)]" : "bg-bg"}`}
       >
         <a href="#conteudo" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-full focus:bg-fg focus:px-4 focus:py-2 focus:text-bg">
           Ir para o conteúdo
