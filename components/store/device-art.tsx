@@ -46,27 +46,27 @@ function Back({ spec, color, id }: { spec: PhoneSpec; color: string; id: string 
     triple: (
       <>
         <Bump x={18} y={18} w={112} h={112} r={30} id={id} />
-        <Lens x={48} y={48} r={17} id={id} color={color} />
-        <Lens x={48} y={100} r={17} id={id} color={color} />
-        <Lens x={100} y={74} r={17} id={id} color={color} />
+        <Lens x={48} y={48} r={19} id={id} color={color} />
+        <Lens x={48} y={100} r={19} id={id} color={color} />
+        <Lens x={100} y={74} r={19} id={id} color={color} />
         <g transform="translate(103 34)">{flash}</g>
         <circle cx="103" cy="114" r="6" fill={shade(color, -45)} />
       </>
     ),
     diagonal: (
       <>
-        <Bump x={18} y={18} w={96} h={96} r={26} id={id} />
-        <Lens x={44} y={44} r={15} id={id} color={color} />
-        <Lens x={88} y={88} r={15} id={id} color={color} />
-        <g transform="translate(90 42)">{flash}</g>
+        <Bump x={18} y={18} w={104} h={104} r={28} id={id} />
+        <Lens x={47} y={47} r={19} id={id} color={color} />
+        <Lens x={93} y={93} r={19} id={id} color={color} />
+        <g transform="translate(97 43)">{flash}</g>
       </>
     ),
     vertical: (
       <>
-        <Bump x={20} y={18} w={52} h={108} r={26} id={id} />
-        <Lens x={46} y={45} r={15} id={id} color={color} />
-        <Lens x={46} y={99} r={15} id={id} color={color} />
-        <g transform="translate(90 34)">{flash}</g>
+        <Bump x={18} y={16} w={60} h={120} r={30} id={id} />
+        <Lens x={48} y={48} r={19} id={id} color={color} />
+        <Lens x={48} y={104} r={19} id={id} color={color} />
+        <g transform="translate(96 34)">{flash}</g>
       </>
     ),
     single: (
