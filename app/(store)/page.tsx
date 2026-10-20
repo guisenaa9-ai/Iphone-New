@@ -41,28 +41,28 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(storeLd).replace(/</g, "\\u003c") }} />
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd).replace(/</g, "\\u003c") }} />}
 
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden">
-        <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(60%_55%_at_70%_45%,color-mix(in_srgb,var(--accent)_22%,transparent),transparent_70%)]" />
-        <div className="container-page grid items-center gap-8 pb-12 pt-10 sm:pt-16 lg:min-h-[min(760px,calc(100dvh-4rem))] lg:grid-cols-[1.05fr_1fr] lg:pb-20">
-          <div className="hero-in grid gap-5 max-lg:text-center">
-            {s.hero.eyebrow && <p className="text-eyebrow text-accent">{s.hero.eyebrow}</p>}
-            <h1 className="text-display text-balance">{s.hero.title}</h1>
-            {s.hero.subtitle && <p className="mx-auto max-w-xl text-[18px] leading-relaxed text-muted lg:mx-0 lg:text-[20px]">{s.hero.subtitle}</p>}
-            <div className="mt-3 flex flex-wrap gap-3 max-lg:justify-center">
+      {/* Hero: palco escuro e centralizado, independente do tema da loja */}
+      <section className="relative isolate overflow-hidden bg-black text-white">
+        <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(45%_40%_at_50%_68%,color-mix(in_srgb,var(--accent)_28%,transparent),transparent_75%)]" />
+        <div className="container-page grid justify-items-center gap-5 pb-4 pt-14 text-center sm:pt-20">
+          <div className="hero-in grid justify-items-center gap-4">
+            {s.hero.eyebrow && <p className="text-eyebrow text-white/60">{s.hero.eyebrow}</p>}
+            <h1 className="text-display max-w-4xl text-balance">{s.hero.title}</h1>
+            {s.hero.subtitle && <p className="max-w-xl text-[18px] leading-relaxed text-white/70 lg:text-[20px]">{s.hero.subtitle}</p>}
+            <div className="mt-2 flex flex-wrap justify-center gap-3">
               {s.hero.primaryLabel && (
                 <ButtonLink href={s.hero.primaryHref || "/catalogo"} size="lg">
                   {s.hero.primaryLabel}
                 </ButtonLink>
               )}
               {s.hero.secondaryLabel && (
-                <ButtonLink href={s.hero.secondaryHref || "/catalogo"} size="lg" variant="secondary">
+                <Link href={s.hero.secondaryHref || "/catalogo"} className={buttonClass("ghost", "lg", "text-white ring-1 ring-white/30 hover:bg-white/10")}>
                   {s.hero.secondaryLabel}
-                </ButtonLink>
+                </Link>
               )}
             </div>
             {heroProduct && !s.hero.imageUrl && (
-              <p className="text-[14px] text-muted">
+              <p className="text-[14px] text-white/60">
                 <Link href={`/produto/${heroProduct.slug}`} className="underline-offset-4 hover:underline">
                   {heroProduct.name}
                 </Link>{" "}
@@ -70,21 +70,13 @@ export default async function Home() {
               </p>
             )}
           </div>
-          <div className="relative mx-auto aspect-[5/6] w-full max-w-[460px]">
+          <div className="relative mt-4 aspect-[4/5] w-full max-w-[420px] sm:max-w-[480px]">
             {s.hero.imageUrl ? (
-              <Image src={s.hero.imageUrl} alt="" fill priority sizes="(min-width: 1024px) 460px, 90vw" className="hero-in object-contain" unoptimized={!s.hero.imageUrl.includes("/storage/v1/object/public/")} />
+              <Image src={s.hero.imageUrl} alt="" fill priority sizes="(min-width: 640px) 480px, 90vw" className="hero-in object-contain" unoptimized={!s.hero.imageUrl.includes("/storage/v1/object/public/")} />
             ) : (
-              <>
-                <div aria-hidden className="absolute inset-[18%_10%] rounded-full bg-accent/25 blur-3xl" />
-                {heroColors[1] && (
-                  <div className="hero-in absolute left-[8%] top-[12%] w-[46%] -rotate-[8deg] opacity-95" style={{ animationDelay: "180ms" }}>
-                    <PhoneArt color={heroColors[1].hex ?? undefined} lenses={/pro/i.test(heroProduct?.name ?? "") ? 3 : 2} />
-                  </div>
-                )}
-                <div className={`hero-float absolute w-[52%] ${heroColors[1] ? "right-[8%] top-[4%] rotate-[6deg]" : "left-[24%] top-[4%]"}`}>
-                  <PhoneArt color={heroColors[0]?.hex ?? "#2b2b2e"} lenses={/pro/i.test(heroProduct?.name ?? "") ? 3 : 2} />
-                </div>
-              </>
+              <div className="hero-float absolute inset-x-[4%] top-[2%]">
+                <PhoneArt color={heroColors[0]?.hex ?? "#3a4150"} name={heroProduct?.name} />
+              </div>
             )}
           </div>
         </div>
@@ -92,7 +84,7 @@ export default async function Home() {
 
       {/* Promoções sazonais cadastradas no painel */}
       {banners.length > 0 && (
-        <section aria-label="Promoções" className="container-page">
+        <section aria-label="Promoções" className="container-page pt-10">
           <ul className={`grid gap-4 ${banners.length > 1 ? "md:grid-cols-2" : ""}`}>
             {banners.map((b, i) => (
               <li key={i}>
@@ -128,9 +120,9 @@ export default async function Home() {
         </nav>
       )}
 
-      <ProductShelf eyebrow="Selecionados" title="iPhones em destaque" href="/catalogo?categoria=iphone" products={featured} commerce={c} />
-      <ProductShelf eyebrow="Novidades" title="Lançamentos" href="/catalogo?ordem=novidades" products={products.filter((p) => p.is_launch)} commerce={c} />
-      <ProductShelf eyebrow="Preferidos dos clientes" title="Mais vendidos" products={best} commerce={c} />
+      <ProductShelf title="Todos os modelos." tagline="Escolha o seu." href="/catalogo?categoria=iphone" products={featured} commerce={c} />
+      <ProductShelf title="Lançamentos." tagline="O mais novo da Apple." href="/catalogo?ordem=novidades" products={products.filter((p) => p.is_launch)} commerce={c} />
+      <ProductShelf title="Mais vendidos." tagline="Os preferidos dos clientes." products={best} commerce={c} />
       <ProductShelf eyebrow="Ofertas" title="Ofertas especiais" href="/catalogo?ofertas=1" products={products.filter(onSale)} commerce={c} id="ofertas" />
       <ProductShelf eyebrow="Seminovos" title="iPhones seminovos" href="/catalogo?condicao=seminovo" products={products.filter(isUsed)} commerce={c} />
       <ProductShelf eyebrow="Complete o seu setup" title="Acessórios" href="/catalogo?categoria=acessorio" products={products.filter((p) => p.category === "acessorio")} commerce={c} />
