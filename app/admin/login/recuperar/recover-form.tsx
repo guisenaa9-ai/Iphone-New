@@ -1,11 +1,19 @@
 "use client";
 
+import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useState } from "react";
 import { Captcha, captchaToken, HCAPTCHA_SITE_KEY, resetCaptcha } from "@/components/admin/captcha";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
-import { browserClient } from "@/lib/supabase/browser";
+
+// Fluxo "implicit": o link do e-mail volta com a sessão no endereço (#access_token=...) e funciona em
+// qualquer aparelho. O PKCE padrão só vale no navegador que pediu, e o modelo de e-mail do Supabase
+// (que permitiria outro formato) só é editável com SMTP próprio.
+const implicitAuth = () =>
+  createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  }).auth;
 
 export function RecoverForm() {
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +45,7 @@ export function RecoverForm() {
         const token = captchaToken(f);
         if (HCAPTCHA_SITE_KEY && !token) return setError("Confirme que você não é um robô.");
         setPending(true);
-        const { error } = await browserClient().auth.resetPasswordForEmail(String(f.get("email")), {
+        const { error } = await implicitAuth().resetPasswordForEmail(String(f.get("email")), {
           redirectTo: `${window.location.origin}/admin/login/nova-senha`,
           captchaToken: token,
         });
