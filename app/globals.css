@@ -15,7 +15,7 @@
   --border: rgb(17 17 19 / 0.1);
   --border-strong: rgb(17 17 19 / 0.18);
   --overlay: rgb(10 10 12 / 0.45);
-  --glass: rgb(255 255 255 / 0.72);
+  --glass: rgb(255 255 255 / 0.86);
   --success: #157f3b;
   --warning: #9a5b00;
   --danger: #c4231b;
@@ -42,7 +42,7 @@
   --border: rgb(255 255 255 / 0.1);
   --border-strong: rgb(255 255 255 / 0.18);
   --overlay: rgb(0 0 0 / 0.6);
-  --glass: rgb(16 16 18 / 0.72);
+  --glass: rgb(16 16 18 / 0.86);
   --success: #4ade80;
   --warning: #fbbf24;
   --danger: #f87171;
@@ -62,7 +62,7 @@
     --border: rgb(255 255 255 / 0.1);
     --border-strong: rgb(255 255 255 / 0.18);
     --overlay: rgb(0 0 0 / 0.6);
-    --glass: rgb(16 16 18 / 0.72);
+    --glass: rgb(16 16 18 / 0.86);
     --success: #4ade80;
     --warning: #fbbf24;
     --danger: #f87171;
@@ -179,8 +179,8 @@
 
   .glass {
     background: var(--glass);
-    backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
   }
 
   .skeleton {
