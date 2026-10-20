@@ -175,7 +175,8 @@ Os testes E2E do painel usam `E2E_ADMIN_EMAIL` e `E2E_ADMIN_PASSWORD` (crie um a
 - **Limite de abuso**: o banco já limita pedidos e trocas (veja *Banco de dados*). Como segunda camada,
   crie em **Vercel › Firewall › Rules** uma regra *Rate Limit*: método `POST`, caminho `/checkout`
   ou `/troca`, 10 requisições por minuto por IP, ação `Deny`. No Supabase, mantenha o cadastro
-  público desligado e, se houver tentativas de senha, ative CAPTCHA em **Authentication › Attack Protection**.
+  público desligado e, se quiser CAPTCHA no login do painel: cadastre `NEXT_PUBLIC_HCAPTCHA_SITE_KEY`,
+  publique e só então ligue o hCaptcha em **Authentication › Attack Protection** (na ordem inversa o login trava).
 - **Imagens**: use fotos próprias da loja ou com licença. Fotos oficiais de fabricantes exigem autorização.
 
 ## Prévias para prospecção

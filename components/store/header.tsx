@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, MessageCircle, Search, ShoppingBag, X } from "lucide-react";
+import { ChevronRight, Menu, MessageCircle, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "./cart";
 import { SearchDialog, type SearchItem } from "./search";
@@ -68,7 +68,7 @@ export function Header({
   return (
     <>
       <header
-        className={`sticky top-0 z-40 transition-[background-color,box-shadow] duration-300 ${scrolled || menu ? "glass shadow-[0_1px_0_var(--border)]" : "bg-bg"}`}
+        className={`theme-dark sticky top-0 z-40 text-fg transition-[background-color,box-shadow] duration-300 ${scrolled && !menu ? "glass shadow-[0_1px_0_var(--border)]" : "bg-bg"}`}
       >
         <a href="#conteudo" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-full focus:bg-fg focus:px-4 focus:py-2 focus:text-bg">
           Ir para o conteúdo
@@ -113,21 +113,33 @@ export function Header({
           </div>
         </div>
         {menu && (
-          <div id="menu-mobile" className="glass fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto lg:hidden [animation:fade-in_.25s_var(--ease)]">
-            <nav aria-label="Menu" className="container-page pb-10 pt-4">
-              <ul className="grid">
-                {nav.map((l, i) => (
-                  <li key={l.href} style={{ animation: `sheet-in .45s var(--ease) ${i * 40}ms both` }}>
-                    <Link href={l.href} className="flex h-14 items-center border-b border-border text-[22px] font-semibold tracking-[-0.02em]">
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          // Ancorado no cabeçalho (sticky), abre logo abaixo dele mesmo com a faixa de aviso visível; fundo opaco.
+          <div id="menu-mobile" className="absolute inset-x-0 top-full h-[calc(100dvh-4rem)] overflow-y-auto border-t border-border bg-bg lg:hidden [animation:fade-in_.25s_var(--ease)]">
+            <nav aria-label="Menu" className="container-page grid min-h-full content-between gap-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-6">
+              <div className="grid gap-3">
+                <p className="text-eyebrow">Explorar a loja</p>
+                <ul className="grid">
+                  {nav.map((l, i) => (
+                    <li key={l.href} style={{ animation: `sheet-in .45s var(--ease) ${i * 40}ms both` }}>
+                      <Link
+                        href={l.href}
+                        aria-current={pathname === l.href.split("?")[0] ? "page" : undefined}
+                        className="group flex h-16 items-center justify-between border-b border-border text-[26px] font-semibold tracking-[-0.025em] aria-[current=page]:text-accent"
+                      >
+                        {l.label}
+                        <ChevronRight aria-hidden className="size-5 text-muted transition-transform duration-300 group-active:translate-x-1" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
               {whatsapp && (
-                <a href={waLink(whatsapp)} target="_blank" rel="noopener" className="mt-8 flex h-13 items-center justify-center gap-2 rounded-full bg-fg text-[16px] font-medium text-bg">
-                  <MessageCircle aria-hidden className="size-5" /> Falar no WhatsApp
-                </a>
+                <div className="grid gap-3 rounded-[24px] bg-bg-subtle p-5" style={{ animation: `sheet-in .45s var(--ease) ${nav.length * 40}ms both` }}>
+                  <p className="text-[15px] text-muted">Dúvidas sobre algum modelo? Fale com a equipe.</p>
+                  <a href={waLink(whatsapp)} target="_blank" rel="noopener" className="flex h-13 items-center justify-center gap-2 rounded-full bg-accent text-[16px] font-medium text-accent-fg">
+                    <MessageCircle aria-hidden className="size-5" /> Falar no WhatsApp
+                  </a>
+                </div>
               )}
             </nav>
           </div>

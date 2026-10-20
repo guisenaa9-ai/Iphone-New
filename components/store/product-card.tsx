@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Eye } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
+import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { CONDITION_LABEL, cheapest, colorsOf, inStock, variantImages, type Product } from "@/lib/catalog";
 import type { StoreSettings } from "@/lib/settings";
@@ -24,50 +24,50 @@ export function ProductCard({ product, commerce, priority = false }: { product: 
   const used = product.variants.every((v) => v.condition !== "novo") ? CONDITION_LABEL[min.condition] : null;
 
   return (
-    <article className="group relative grid content-start gap-4">
-      <div className="relative overflow-hidden rounded-[24px] bg-bg-subtle transition-shadow duration-500 ease-premium group-hover:shadow-card">
-        <Link href={`/produto/${product.slug}`} className="block aspect-[4/5]" aria-label={product.name}>
-          <span className="absolute inset-[12%] transition-transform duration-700 ease-premium group-hover:scale-[1.04]">
-            <ProductMedia src={img} alt={product.name} category={product.category} color={shown.color_hex} name={product.name} priority={priority} />
-          </span>
+    <article className="@container group relative flex h-full flex-col gap-3 rounded-[24px] bg-surface p-4 shadow-card ring-1 ring-border transition-shadow duration-500 ease-premium hover:shadow-pop @[16rem]:gap-4 @[16rem]:p-6">
+      <div className="pointer-events-none flex min-h-6 flex-wrap gap-1.5">
+        {product.is_launch && <Badge tone="inverse">Lançamento</Badge>}
+        {product.variants.some((v) => v.compare_at_cents) && <Badge tone="accent">Oferta</Badge>}
+        {used && <Badge>{used}</Badge>}
+        {!available && <Badge tone="danger">Esgotado</Badge>}
+      </div>
+      <h3 className="text-[17px] font-semibold leading-tight tracking-[-0.02em] @[16rem]:text-[21px]">
+        <Link href={`/produto/${product.slug}`} className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none">
+          {product.name}
         </Link>
-        <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
-          {product.is_launch && <Badge tone="inverse">Lançamento</Badge>}
-          {product.variants.some((v) => v.compare_at_cents) && <Badge tone="accent">Oferta</Badge>}
-          {used && <Badge>{used}</Badge>}
-          {!available && <Badge tone="danger">Esgotado</Badge>}
-        </div>
+      </h3>
+      <div className="relative aspect-square">
+        <span className="absolute inset-[6%] transition-transform duration-700 ease-premium group-hover:scale-[1.04]">
+          <ProductMedia src={img} alt={product.name} category={product.category} color={shown.color_hex} name={product.name} priority={priority} />
+        </span>
         <button
           type="button"
           onClick={() => setQuick(true)}
-          className="glass absolute bottom-3 right-3 z-10 grid size-11 place-items-center rounded-full opacity-100 ring-1 ring-border transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+          className="glass absolute bottom-0 right-0 z-10 hidden size-11 place-items-center rounded-full ring-1 ring-border transition-opacity duration-300 sm:grid sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
           aria-label={`Visualização rápida de ${product.name}`}
         >
           <Eye aria-hidden className="size-[18px]" />
         </button>
       </div>
-      <div className="grid gap-2 px-1">
-        {colors.length > 1 && (
-          <ul className="flex gap-1.5" aria-label={`${colors.length} cores`}>
-            {colors.slice(0, 6).map((c) => (
-              <li key={c.name}>
-                <span
-                  onMouseEnter={() => setHover(c.name)}
-                  onMouseLeave={() => setHover(null)}
-                  title={c.name}
-                  className="block size-3.5 rounded-full shadow-[inset_0_0_0_1px_rgb(0_0_0/0.15)]"
-                  style={{ background: c.hex ?? "#999" }}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-        <h3 className="text-[16px] font-semibold leading-snug tracking-[-0.01em]">
-          <Link href={`/produto/${product.slug}`} className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none">
-            {product.name}
-          </Link>
-        </h3>
+      <ul className="flex min-h-3.5 justify-center gap-1.5" aria-label={colors.length > 1 ? `${colors.length} cores` : undefined}>
+        {colors.length > 1 &&
+          colors.slice(0, 6).map((c) => (
+            <li key={c.name}>
+              <span
+                onMouseEnter={() => setHover(c.name)}
+                onMouseLeave={() => setHover(null)}
+                title={c.name}
+                className="relative z-10 block size-3.5 rounded-full shadow-[inset_0_0_0_1px_rgb(0_0_0/0.15)]"
+                style={{ background: c.hex ?? "#999" }}
+              />
+            </li>
+          ))}
+      </ul>
+      <div className="mt-auto flex flex-col gap-3 @[16rem]:flex-row @[16rem]:items-end @[16rem]:justify-between">
         <Price cents={min.price_cents} compareAt={priced ? null : min.compare_at_cents} commerce={commerce} from={priced} />
+        <span aria-hidden className={buttonClass("primary", "sm", "shrink-0 @max-[16rem]:w-full")}>
+          Comprar
+        </span>
       </div>
 
       <Dialog open={quick} onClose={() => setQuick(false)} title={product.name} wide>
