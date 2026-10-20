@@ -13,7 +13,7 @@ export default async function Privacy() {
       <h1 className="text-title">Política de privacidade</h1>
       <p className="text-muted">Esta política explica como {who}{s.content.cnpj && `, CNPJ ${s.content.cnpj},`} trata os dados pessoais informados neste site.</p>
       <h2>Dados que coletamos</h2>
-      <p>Nome, celular, e-mail (opcional), endereço de entrega e observações informados no pedido ou no formulário de avaliação de aparelho. O carrinho fica salvo apenas no seu navegador.</p>
+      <p>Nome, celular, e-mail (opcional), endereço de entrega e observações informados no pedido ou no formulário de avaliação de aparelho. O carrinho fica salvo apenas no seu navegador. Ao enviar um pedido ou formulário, registramos o endereço IP por até 24 horas, só para limitar tentativas abusivas (base legal: legítimo interesse em proteger a loja).</p>
       <h2>Para que usamos</h2>
       <p>Para registrar e entregar seu pedido, entrar em contato sobre ele, emitir documentos fiscais e responder solicitações de avaliação de troca (bases legais: execução de contrato e cumprimento de obrigação legal).</p>
       <h2>Pagamentos</h2>
