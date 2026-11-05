@@ -77,7 +77,9 @@ describe("prévias de prospecção", () => {
     const { PREVIEWS } = await import("@/config/previews");
     const { withOverrides } = await import("@/lib/settings");
     const base = resolveSettings({ contact: { whatsapp: "5592900000000" }, commerce: { installmentsMax: 12 } });
-    for (const [key, preset] of Object.entries(PREVIEWS)) {
+    // Exemplo fixo: mantém o teste útil enquanto não há prévia cadastrada.
+    const exemplo = { brand: { name: "Loja Exemplo" }, content: { demoNotice: true } };
+    for (const [key, preset] of Object.entries({ exemplo, ...PREVIEWS })) {
       const s = withOverrides(base, preset);
       expect(s.brand.name, key).not.toBe(DEFAULT_SETTINGS.brand.name);
       expect(s.content.demoNotice, key).toBe(true); // prévia nunca se passa por loja real
