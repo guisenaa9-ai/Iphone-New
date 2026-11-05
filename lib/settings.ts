@@ -6,7 +6,7 @@ import { z } from "zod";
 // sem telefone, endereço ou condição comercial inventada.
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Use uma cor no formato #RRGGBB");
-// Aceita URL completa ou arquivo do próprio site (ex.: /previews/rampage.jpg).
+// Aceita URL completa ou arquivo do próprio site (ex.: /previews/logo.jpg).
 const url = z.union([
   z.literal(""),
   z.string().max(500).regex(/^https?:\/\/[^\s"<>]+$/i, "Use um link que comece com https://"),
